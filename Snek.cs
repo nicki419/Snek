@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace Snek {
@@ -32,7 +33,11 @@ namespace Snek {
             Head = new();
             BodyPieces = new() {new((Head.Position.Item1-1, Head.Position.Item2)), new((Head.Position.Item1-2, Head.Position.Item2)), new((Head.Position.Item1-3, Head.Position.Item2)) };
             Speed = 2;
+        }
 
+        public void CreateBodyPiece((int, int) position) {
+            BodyPieces.Add(new((position.Item1, position.Item2)));
+            BodyPieces[BodyPieces.Count - 1].BodyCharacter = ' ';
         }
     }
 }

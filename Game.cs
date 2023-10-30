@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using C__Snek;
 
 namespace Snek {
     public class Game {
@@ -13,6 +14,8 @@ namespace Snek {
         public int score;
         public string BoxStyle;
         public int HighScore;
+        public Food food = new();
+        public char passDownCharacter;
 
         public struct BoxStyles {
             /// <summary> Construction:
@@ -52,13 +55,12 @@ namespace Snek {
             (int, int) lastPosition = (1, 3);
             (int, int) passDownPosition;
             (int, int) positionPlaceholder;
-            char passDownCharacter;
             char characterPlaceHolder;
             bool moveOverride = false;
 
             char direction = 'r';
             char previousDirection = 'r';
-            int score = 0;
+            score = 0;
 
             snek.Head.HeadCharacter = '<';
             foreach(BodyPiece piece in snek.BodyPieces) piece.BodyCharacter = '\u2500';
@@ -77,6 +79,7 @@ namespace Snek {
                                 if(snek.Head.Position.Item2 == 3) snek.Head.Position = (snek.Head.Position.Item1, 3);
                                 else snek.Head.Position = (snek.Head.Position.Item1, snek.Head.Position.Item2 - 1);
                                 moveOverride = true;
+                                if(food.CheckForFood(snek.Head.Position)) food.Eat();
                                 Thread.Sleep(1000/(snek.Speed + 2));
                             }
                             break;
@@ -90,6 +93,7 @@ namespace Snek {
                                 if(snek.Head.Position.Item1 == 1) snek.Head.Position = (ScreenDimensions.Item1, snek.Head.Position.Item2);
                                 else snek.Head.Position = (snek.Head.Position.Item1 - 1, snek.Head.Position.Item2);
                                 moveOverride = true;
+                                if(food.CheckForFood(snek.Head.Position)) food.Eat();
                                 Thread.Sleep(1000/(snek.Speed + 2));
                             }
                             break;
@@ -103,6 +107,7 @@ namespace Snek {
                                 if(snek.Head.Position.Item2 == ScreenDimensions.Item2 + 3) snek.Head.Position = (snek.Head.Position.Item1, 3);
                                 else snek.Head.Position = (snek.Head.Position.Item1, snek.Head.Position.Item2  + 1);
                                 moveOverride = true;
+                                if(food.CheckForFood(snek.Head.Position)) food.Eat();
                                 Thread.Sleep(1000/(snek.Speed + 2));
                             }
                             break;
@@ -116,6 +121,7 @@ namespace Snek {
                                 if(snek.Head.Position.Item1 == ScreenDimensions.Item1) snek.Head.Position = (1, snek.Head.Position.Item2);
                                 else snek.Head.Position = (snek.Head.Position.Item1 + 1, snek.Head.Position.Item2);
                                 moveOverride = true;
+                                if(food.CheckForFood(snek.Head.Position)) food.Eat();
                                 Thread.Sleep(1000/(snek.Speed + 2));
                             }
                             break;
@@ -133,9 +139,10 @@ namespace Snek {
             passDownCharacter = snek.BodyPieces[0].BodyCharacter;
             passDownPosition = snek.Head.Position;
 
+            // Main Game Loop
             while(true) {
 
-
+                // Determining the next move based on the direction variable
                 switch(direction) {
                     case 'r':
                         snek.Head.HeadCharacter = '<';
@@ -147,6 +154,7 @@ namespace Snek {
                                 passDownCharacter = '\u2500';
                                 if(snek.Head.Position.Item1 != ScreenDimensions.Item1) snek.Head.Position = (snek.Head.Position.Item1 + 1, snek.Head.Position.Item2);
                                 else snek.Head.Position = (1, snek.Head.Position.Item2);
+                                if(food.CheckForFood(snek.Head.Position)) food.Eat();
                             }
                         }
 
@@ -163,6 +171,7 @@ namespace Snek {
                                 passDownCharacter = '\u2500';
                                 if(snek.Head.Position.Item1 != 1) snek.Head.Position = (snek.Head.Position.Item1 - 1, snek.Head.Position.Item2);
                                 else snek.Head.Position = (ScreenDimensions.Item1, snek.Head.Position.Item2);
+                                if(food.CheckForFood(snek.Head.Position)) food.Eat();
                             }
                         }
 
@@ -179,6 +188,7 @@ namespace Snek {
                                 passDownCharacter = '\u2502';
                                 if(snek.Head.Position.Item2 != 3) snek.Head.Position = (snek.Head.Position.Item1, snek.Head.Position.Item2 - 1);
                                 else snek.Head.Position = (snek.Head.Position.Item1, ScreenDimensions.Item2 + 3);
+                                if(food.CheckForFood(snek.Head.Position)) food.Eat();
                             }
                         }
 
@@ -195,6 +205,7 @@ namespace Snek {
                                 passDownCharacter = '\u2502';
                                 if(snek.Head.Position.Item2 != ScreenDimensions.Item2 + 3) snek.Head.Position = (snek.Head.Position.Item1, snek.Head.Position.Item2  + 1);
                                 else snek.Head.Position = (snek.Head.Position.Item1, 3);
+                                if(food.CheckForFood(snek.Head.Position)) food.Eat();
                             }
                         }
 
@@ -217,6 +228,10 @@ namespace Snek {
 
                 Console.SetCursorPosition(7, 0);
                 Console.Write(score);
+
+                // Place Food
+                Console.SetCursorPosition(food.Position.Item1 + 1, food.Position.Item2 + 3);
+                Console.Write(food.Character);
 
                 // Erase last snek body piece
                 Console.SetCursorPosition(lastPosition.Item1, lastPosition.Item2);
